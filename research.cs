@@ -57,7 +57,7 @@ namespace giantavocado
 					res.Content.ReadAsStringAsync().Result
 				);
 			
-				ResearchConfig config = JsonConvert.DeserializeObject<ResearchConfig>(result.data.Data.ResearchConfig);
+				ResearchConfig config = JsonConvert.DeserializeObject<ResearchConfig>((string)result.data.Data.ResearchConfig);
 
 				var userData = new ResearchUserData();
 				userData.Id = config.Id;
