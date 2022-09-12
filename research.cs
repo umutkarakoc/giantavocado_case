@@ -56,6 +56,7 @@ namespace giantavocado
 				dynamic result = JsonConvert.DeserializeObject(
 					res.Content.ReadAsStringAsync().Result
 				);
+				return new OkObjectResult(result);
 				var config = JsonConvert.DeserializeObject<ResearchConfig>(result.data.Data.ResearchConfig);
 
 				var userData = new ResearchUserData();
