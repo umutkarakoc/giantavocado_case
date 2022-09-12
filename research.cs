@@ -38,13 +38,15 @@ namespace giantavocado
 			dynamic data = JsonConvert.DeserializeObject(requestBody);
 			string userId = data.userId;
 
-			var getConfigParams = (dynamic)new JsonObject();
-			getConfigParams.Keys = new string[] { "ResearchConfig" };
+
 
 			using (var httpClient = new HttpClient())
 			{
 				httpClient.DefaultRequestHeaders.Add("X-SecretKey", Environment.GetEnvironmentVariable("PLAYFAB_SECRET"));
-				HttpResponseMessage res = await httpClient.PostAsync("https://ECEE9.playfabapi.com/Server/GetTitleInternalData", getConfigParams);
+				HttpResponseMessage res = await httpClient.PostAsync(
+					"https://ECEE9.playfabapi.com/Server/GetTitleInternalData", 
+					new StringContent("{\"Keys\": [\"ResearchConfig\"]}", Encoding.UTF8, "application/json")
+				);
 
 				if (!res.IsSuccessStatusCode)
 				{
