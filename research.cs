@@ -53,12 +53,15 @@ namespace giantavocado
 					return new InternalServerErrorResult();
 				}
 
-				var result = JsonConvert.DeserializeObject<ResearchConfig>(res.Content.ReadAsStringAsync().Result);
+				dynamic result = JsonConvert.DeserializeObject(
+					res.Content.ReadAsStringAsync().Result
+				);
+				var config = JsonConvert.DeserializeObject<ResearchConfig>(result.data.Data.ResearchConfig);
 
 				var userData = new ResearchUserData();
-				userData.Id = result.Id;
+				userData.Id = config.Id;
 				userData.StartDate = DateTime.Now;
-				userData.EndDate = userData.StartDate.AddSeconds(result.Duration);
+				userData.EndDate = userData.StartDate.AddSeconds(config.Duration);
 
 
 				var userDataReq = new UserDataReq {
