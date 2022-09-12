@@ -25,43 +25,56 @@ namespace giantavocado
 		{
 			// log.LogInformation("C# HTTP trigger function processed a request.");
 
-			// string name = req.Query["name"];
+			// 
 
-			// string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-			// dynamic data = JsonConvert.DeserializeObject(requestBody);
+
 			// name = name ?? data?.name;
 
 			// string responseMessage = string.IsNullOrEmpty(name)
 			//     ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
 			//     : $"Hello, {name}. This HTTP triggered function executed successfully.";
 
-            var getConfigParams = (dynamic)new JsonObject();
-            getConfigParams.Keys = new string[]{"ResearchConfig"};
+			string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+			dynamic data = JsonConvert.DeserializeObject(requestBody);
+			string userId = data.userId;
+
+			var getConfigParams = (dynamic)new JsonObject();
+			getConfigParams.Keys = new string[] { "ResearchConfig" };
 
 			using (var httpClient = new HttpClient())
-			{ 
+			{
 				httpClient.DefaultRequestHeaders.Add("X-SecretKey", Environment.GetEnvironmentVariable("PLAYFAB_SECRET"));
-				HttpResponseMessage res = await httpClient.PostAsync("https://ECEE9.playfabapi.com/Server/GetTitleInternalData", getConfigParams );
+				HttpResponseMessage res = await httpClient.PostAsync("https://ECEE9.playfabapi.com/Server/GetTitleInternalData", getConfigParams);
 
 				if (!res.IsSuccessStatusCode)
 				{
 					return new InternalServerErrorResult();
 				}
-				
-				var result  = JsonConvert.DeserializeObject<ResearchConfig>(res.Content.ReadAsStringAsync().Result);
+
+				var result = JsonConvert.DeserializeObject<ResearchConfig>(res.Content.ReadAsStringAsync().Result);
 
 				var userData = new ResearchUserData();
 				userData.Id = result.Id;
 				userData.StartDate = DateTime.Now;
 				userData.EndDate = userData.StartDate.AddSeconds(result.Duration);
-				
-				var json = JsonConvert.SerializeObject(userData);
-				var saveParams = new StringContent(json, Encoding.UTF8, "application/json");
-				HttpResponseMessage saveRes = await httpClient.PostAsync("https://ECEE9.playfabapi.com/Server/UpdateUserData", saveParams );
 
-				if(!saveRes.IsSuccessStatusCode)
+
+				var userDataReq = new UserDataReq {
+					PlayFabId = userId,
+					Data = new UserData {
+						Research = JsonConvert.SerializeObject(userData)
+					}
+				};
+				var userDataReqJSON = JsonConvert.SerializeObject(userDataReq);
+
+				HttpResponseMessage saveRes = await httpClient.PostAsync(
+						"https://ECEE9.playfabapi.com/Server/UpdateUserData", 
+						new StringContent(userDataReqJSON, Encoding.UTF8, "application/json")
+					);
+
+				if (!saveRes.IsSuccessStatusCode)
 					return new InternalServerErrorResult();
-				
+
 				return new OkObjectResult(true);
 			}
 		}
@@ -78,5 +91,14 @@ namespace giantavocado
 		public string Id { get; set; }
 		public DateTime StartDate { get; set; }
 		public DateTime EndDate { get; set; }
+	}
+
+	class UserDataReq {
+		public string PlayFabId { get; set; }
+		public UserData Data { get; set; }
+	}
+
+	class UserData {
+		public string Research { get; set; }
 	}
 }
