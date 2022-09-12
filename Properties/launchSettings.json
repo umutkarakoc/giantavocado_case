@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "giant_avocado_case": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7289",
+      "launchBrowser": false
+    }
+  }
+}
