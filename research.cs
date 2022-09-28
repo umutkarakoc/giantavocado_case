@@ -29,8 +29,8 @@ namespace giantavocado
 			string userId = data.userId;
 
 			using (var httpClient = new HttpClient())
-			{
-				// playfab secretkey'i azure settings'den geliyor
+				{
+					// playfab secretkey'i azure settings'den geliyor
 				httpClient.DefaultRequestHeaders.Add("X-SecretKey", Environment.GetEnvironmentVariable("PLAYFAB_SECRET"));
 
 				HttpResponseMessage res = await httpClient.PostAsync(
